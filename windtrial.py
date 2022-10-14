@@ -14,9 +14,8 @@ import urllib.request
 import rioxarray
 
 address = st.sidebar.text_input("Adress", "123 Main Street, Columbus, OH 43215")
-d = st.sidebar.date_input("Date",  pd.Timestamp(2020,10,29)).strftime('%Y%m%d')
+d = st.sidebar.date_input("Date",  pd.Timestamp(2022,9,28)).strftime('%Y%m%d')
 t = st.sidebar.time_input('Time', datetime.time(10, 00)).strftime('%H')+'00'
-
 
 year,month,day=d[:4],d[4:6],d[6:8]
 
