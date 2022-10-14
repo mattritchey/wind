@@ -1,6 +1,6 @@
 streamlit==1.4.0
 pandas==1.4.2
 geopy==2.2.0
-rasterio==1.2.10
-urllib3==1.26.9
+rioxarray==0.12.1
+urllib.request==3.10
 datetime==3.0.1
