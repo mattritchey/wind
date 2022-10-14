@@ -11,7 +11,7 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 import datetime
 import urllib.request 
-import rasterio
+import rioxarray
 
 address = st.sidebar.text_input("Adress", "123 Main Street, Columbus, OH 43215")
 d = st.sidebar.date_input("Date",  pd.Timestamp(2020,10,29)).strftime('%Y%m%d')
@@ -36,12 +36,9 @@ location = geolocator.geocode(address)
 lat,lon=location.latitude,location.longitude
 map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
-import rioxarray
 rds = rioxarray.open_rasterio(file)
 projected = rds.rio.reproject("EPSG:4326")
 wind_mph=projected.sel(x=lon, y=lat, method="nearest").values*2.23694
 
 st.map(map_data) 
 st.write(f"Wind Gust Speed: {wind_mph[0].round(2)} MPH")
-
-print(datetime.__version__)
