@@ -45,8 +45,6 @@ location = geolocator.geocode(address)
 lat,lon=location.latitude,location.longitude
 map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
-import os
-os.environ['PROJ_LIB']=r"C:\Users\mritchey\Downloads\WPy64-31040\python-3.10.4.amd64\Lib\site-packages\osgeo\data\proj"
 
 rds = rioxarray.open_rasterio(file)
 projected = rds.rio.reproject("EPSG:4326")
