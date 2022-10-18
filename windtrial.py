@@ -4,7 +4,7 @@ Created on Fri Oct 14 10:35:25 2022
 
 @author: mritchey
 """
-#streamlit run "C:/Users/mritchey/.spyder-py3/Python Scripts/windtrial.py"
+
 import streamlit as st
 from streamlit_folium import st_folium
 import pandas as pd
@@ -18,7 +18,6 @@ import rasterio
 import numpy as np
 import branca.colormap as cm
 from matplotlib import colors as colors
-
 
 address = st.sidebar.text_input("Address", "123 Main Street, Columbus, OH 43215")
 d = st.sidebar.date_input("Date",  pd.Timestamp(2022,9,28)).strftime('%Y%m%d')
@@ -36,7 +35,6 @@ year,month,day=d[:4],d[4:6],d[6:8]
 url=f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}_{type_wind.upper()}.grib2'
 file=urllib.request.urlretrieve(url, f'{d}{t}.grib2')[0]
 
-
 geolocator = Nominatim(user_agent="GTA Lookup")
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
 
@@ -45,15 +43,11 @@ location = geolocator.geocode(address)
 lat,lon=location.latitude,location.longitude
 map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
 
-
 rds = rioxarray.open_rasterio(file)
 projected = rds.rio.reproject("EPSG:4326")
 wind_mph=projected.sel(x=lon, y=lat, method="nearest").values*2.23694
 
-#st.map(map_data) 
-
 st.write(f"{type_wind.title()} Speed: {wind_mph[0].round(2)} MPH")
-
 
 def mapvalue2color(value, cmap): 
 
