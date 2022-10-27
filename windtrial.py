@@ -18,6 +18,13 @@ import rasterio
 import numpy as np
 import branca.colormap as cm
 from matplotlib import colors as colors
+import os
+import glob
+
+try:
+    for i in glob.glob('*.grib2'): os.remove(i)
+except:
+    pass
 
 address = st.sidebar.text_input("Address", "123 Main Street, Columbus, OH 43215")
 d = st.sidebar.date_input("Date",  pd.Timestamp(2022,9,28)).strftime('%Y%m%d')
@@ -33,7 +40,7 @@ else:
 year,month,day=d[:4],d[4:6],d[6:8]
 
 url=f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}_{type_wind.upper()}.grib2'
-file=urllib.request.urlretrieve(url, f'{d}{t}.grib2')[0]
+file=urllib.request.urlretrieve(url, f'{d}{t}{type_wind}.grib2')[0]
 
 geolocator = Nominatim(user_agent="GTA Lookup")
 geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
