@@ -8,3 +8,4 @@ rasterio==1.2.10
 rioxarray==0.12.2
 streamlit==1.4.0
 streamlit_folium==0.6.15
+urllib3==1.26.9
