@@ -1,16 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Oct 27 14:53:14 2022
 
-@author: mritchey
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Oct 14 10:35:25 2022
-
-@author: mritchey
-"""
 
 import streamlit as st
 from streamlit_folium import st_folium
