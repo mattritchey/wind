@@ -16,6 +16,14 @@ import plotly.express as px
 import os
 import glob
 
+from streamlit.config import on_config_parsed
+from streamlit.web.cli import main
+
+def register_options_menu():
+    import streamlit_option_menu
+
+on_config_parsed(register_options_menu)
+
 try:
     for i in glob.glob('*.grib2'): os.remove(i)
 except:
