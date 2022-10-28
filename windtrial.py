@@ -122,7 +122,7 @@ if entire_day=='Yes':
         time=url[-15:-11]
         return [wind_mph,time]
     
-    results=Parallel(n_jobs=2)(delayed(download_file_get_data)(i) for i in urls)
+    results=Parallel(n_jobs=4)(delayed(download_file_get_data)(i) for i in urls)
     
     df_all=pd.DataFrame(results,columns=['MPH','Time'])
     df_all['MPH']=df_all['MPH'].round(2)
