@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Oct 14 10:35:25 2022
+
+@author: mritchey
+"""
+#streamlit run "C:\Users\mritchey\.spyder-py3\Python Scripts\trial\windtrial2_streamlit.py"
 import streamlit as st
 from streamlit_folium import st_folium
 import pandas as pd
@@ -106,6 +113,7 @@ colormap.caption = 'Wind Speed: MPH'
 m.add_child(colormap)
 
 with col1:
+    st.title('RTMA Model')
     st.write(f"{type_wind.title()} Speed: {wind_mph[0].round(2)} MPH at {time} UTC")
     st_folium(m,height=500)
 
@@ -131,6 +139,7 @@ if entire_day=='Yes':
    
     fig = px.line(df_all, x = "Time", y = "MPH")
     with col2:
+        st.title('Analysis')
         st.plotly_chart(fig)
 else:
     pass
