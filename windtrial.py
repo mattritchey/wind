@@ -41,6 +41,8 @@ entire_day = st.sidebar.selectbox('Graph Entire Day (Takes a Bit):',('No','Yes')
 
 if time[-2:]=='PM' and int(time[:2].strip())<12:
    t= datetime.time(int(time[:2].strip())+12, 00).strftime('%H')+'00'
+elif time[-2:]=='AM' and int(time[:2].strip())==12:
+   t= '0000'
 else:
    t= datetime.time(int(time[:2].strip()), 00).strftime('%H')+'00'
 
