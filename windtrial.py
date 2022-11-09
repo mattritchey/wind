@@ -129,10 +129,8 @@ with col1:
 
 if entire_day == 'Yes':
     times = [f'0{str(i)}'[-2:] for i in range(0, 24)]
-    urls = [
-        f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}00_{type_wind.upper()}.grib2' for t in times]
-    url = urls[0]
-
+    urls = [f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}00_{type_wind.upper()}.grib2' for t in times]
+    
     def download_file_get_data(url):
         file = urllib.request.urlretrieve(url, url[-23:])[0]
         rds = rioxarray.open_rasterio(file)
