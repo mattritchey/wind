@@ -4,7 +4,7 @@ Created on Fri Oct 14 10:35:25 2022
 
 @author: mritchey
 """
-
+#streamlit run "C:\Users\mritchey\.spyder-py3\Python Scripts\streamlit projects\rtma\windtrial2_streamlit_rtma.py"
 import streamlit as st
 from streamlit_folium import st_folium
 import pandas as pd
@@ -23,6 +23,61 @@ import plotly.express as px
 import os
 import glob
 
+def download_file_get_data(url):
+        file = urllib.request.urlretrieve(url, url[-23:])[0]
+        rds = rioxarray.open_rasterio(file)
+        wind_mph = rds.rio.reproject("EPSG:4326")[
+            0, rows, columns].values*2.23694
+        time = url[-15:-11]
+        return [wind_mph, time]
+    
+def mapvalue2color(value, cmap):
+    
+    if np.isnan(value):
+        return (1, 0, 0, 0)
+    else:
+        return colors.to_rgba(cmap(value), 0.7)
+
+@st.cache
+def geocode(address):
+    try: 
+        address2=address.replace(' ','+').replace(',','%2C')
+        df=pd.read_json(f'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address={address2}&benchmark=2020&format=json')
+        results=df.iloc[:1,0][0][0]['coordinates']
+        lat, lon=results['y'],results['x']
+    except:
+        geolocator = Nominatim(user_agent="GTA Lookup")
+        geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
+        location = geolocator.geocode(address)
+        lat, lon = location.latitude, location.longitude
+    return lat, lon
+
+@st.cache
+def get_grib_data(url, d,t):
+    file = urllib.request.urlretrieve(url, f'{d}{t}{type_wind}.grib2')[0]
+    return file
+
+@st.cache
+def graph_entire_day(d):
+    year, month, day = d[:4], d[4:6], d[6:8]
+    times = [f'0{str(i)}'[-2:] for i in range(0, 24)]
+    urls = [f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}00_{type_wind.upper()}.grib2' for t in times]
+    
+    results = Parallel(n_jobs=4)(
+        delayed(download_file_get_data)(i) for i in urls)
+
+    df_all = pd.DataFrame(results, columns=['MPH', 'Time'])
+    df_all['MPH'] = df_all['MPH'].round(2)
+    df_all['Time'] = pd.to_datetime(d+df_all['Time'], format='%Y%m%d%H%M')
+    return df_all
+
+@st.cache
+def convert_df(df):
+    # IMPORTANT: Cache the conversion to prevent computation on every rerun
+    return df.to_csv(index=0).encode('utf-8')
+
+os.environ['PROJ_LIB']=r"C:\Users\mritchey\Downloads\WPy64-31040\python-3.10.4.amd64\Lib\site-packages\osgeo\data\proj"
+
 
 try:
     for i in glob.glob('*.grib2'):
@@ -40,7 +95,7 @@ d = st.sidebar.date_input(
 
 time = st.sidebar.selectbox('Time:', ('12 AM', '6 AM', '12 PM', '6 PM',))
 type_wind = st.sidebar.selectbox('Type:', ('Gust', 'Wind'))
-entire_day = st.sidebar.selectbox(
+entire_day = st.sidebar.radio(
     'Graph Entire Day (Takes a Bit):', ('No', 'Yes'))
 
 if time[-2:] == 'PM' and int(time[:2].strip()) < 12:
@@ -53,30 +108,15 @@ else:
 year, month, day = d[:4], d[4:6], d[6:8]
 
 url = f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}_{type_wind.upper()}.grib2'
-file = urllib.request.urlretrieve(url, f'{d}{t}{type_wind}.grib2')[0]
+file=get_grib_data(url, d, t)
 
 
-geolocator = Nominatim(user_agent="GTA Lookup")
-geocode = RateLimiter(geolocator.geocode, min_delay_seconds=1)
 
-location = geolocator.geocode(address)
-
-lat, lon = location.latitude, location.longitude
-# map_data = pd.DataFrame({'lat': [lat], 'lon': [lon]})
-
+lat, lon = geocode(address)
 
 rds = rioxarray.open_rasterio(file)
 projected = rds.rio.reproject("EPSG:4326")
 wind_mph = projected.sel(x=lon, y=lat, method="nearest").values*2.23694
-
-
-def mapvalue2color(value, cmap):
-
-    if np.isnan(value):
-        return (1, 0, 0, 0)
-    else:
-        return colors.to_rgba(cmap(value), 0.7)
-
 
 affine = projected.rio.transform()
 
@@ -128,28 +168,19 @@ with col1:
 
 
 if entire_day == 'Yes':
-    times = [f'0{str(i)}'[-2:] for i in range(0, 24)]
-    urls = [f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}00_{type_wind.upper()}.grib2' for t in times]
-    
-    def download_file_get_data(url):
-        file = urllib.request.urlretrieve(url, url[-23:])[0]
-        rds = rioxarray.open_rasterio(file)
-        wind_mph = rds.rio.reproject("EPSG:4326")[
-            0, rows, columns].values*2.23694
-        time = url[-15:-11]
-        return [wind_mph, time]
-
-    results = Parallel(n_jobs=4)(
-        delayed(download_file_get_data)(i) for i in urls)
-
-    df_all = pd.DataFrame(results, columns=['MPH', 'Time'])
-    df_all['MPH'] = df_all['MPH'].round(2)
-    df_all['Time'] = pd.to_datetime(d+df_all['Time'], format='%Y%m%d%H%M')
-
+    df_all= graph_entire_day(d)
     fig = px.line(df_all, x="Time", y="MPH")
     with col2:
         st.title('Analysis')
         st.plotly_chart(fig)
+        
+        csv = convert_df(df_all)
+        
+        st.download_button(
+            label="Download data as CSV",
+            data=csv,
+            file_name=f'{d}.csv',
+            mime='text/csv')
 else:
     pass
 
