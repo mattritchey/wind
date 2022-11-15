@@ -4,7 +4,7 @@ Created on Fri Oct 14 10:35:25 2022
 
 @author: mritchey
 """
-#streamlit run "C:\Users\mritchey\.spyder-py3\Python Scripts\streamlit projects\rtma\windtrial2_streamlit_rtma.py"
+
 import streamlit as st
 from streamlit_folium import st_folium
 import pandas as pd
@@ -75,9 +75,6 @@ def graph_entire_day(d):
 def convert_df(df):
     # IMPORTANT: Cache the conversion to prevent computation on every rerun
     return df.to_csv(index=0).encode('utf-8')
-
-os.environ['PROJ_LIB']=r"C:\Users\mritchey\Downloads\WPy64-31040\python-3.10.4.amd64\Lib\site-packages\osgeo\data\proj"
-
 
 try:
     for i in glob.glob('*.grib2'):
