@@ -63,7 +63,7 @@ def graph_entire_day(d):
     times = [f'0{str(i)}'[-2:] for i in range(0, 24)]
     urls = [f'https://mtarchive.geol.iastate.edu/{year}/{month}/{day}/grib2/ncep/RTMA/{d}{t}00_{type_wind.upper()}.grib2' for t in times]
     
-    results = Parallel(n_jobs=6)(
+    results = Parallel(n_jobs=4)(
         delayed(download_file_get_data)(i) for i in urls)
 
     df_all = pd.DataFrame(results, columns=['MPH', 'Time'])
